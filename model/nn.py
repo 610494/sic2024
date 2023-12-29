@@ -11,9 +11,6 @@ class CustomDataset(Dataset):
         self.x1 = x1
         self.x2 = x2
         self.y = y
-        # self.x1 = x1.view(-1, batch_size, x1.shape[1])
-        # self.x2 = x2.view(-1, batch_size, x2.shape[1])
-        # self.y = y.view(-1, batch_size, y.shape[1])
 
     def __len__(self):
         return len(self.x1)
@@ -68,7 +65,6 @@ class SimpleNN(pl.LightningModule):
         for i in range(b):
             y_pred = self(torch.cat((x1[i], x2[i]), dim=0))
             val_loss += nn.L1Loss()(y_pred, y[i])
-        # self.log('val_loss', val_loss)
         self.log('val_loss', val_loss, sync_dist=True)
 
         # if self.lr_sch:
@@ -80,9 +76,6 @@ class SimpleNN(pl.LightningModule):
     #         epoch_average = torch.stack(self.validation_step_outputs).mean()
     #         self.validation_step_outputs.clear()
     #         self.scheduler.step(epoch_average)
-
-        # # 返回验证指标（在 Lightning 中，你可以通过此方法返回想要的任何指标）
-        # return {'val_loss': val_loss_mean}
 
     def configure_optimizers(self):
         if self.lr_sch:
@@ -103,33 +96,8 @@ class SimpleNN(pl.LightningModule):
     def load_checkpoint(self, checkpoint_path):
         # 加载检查点文件
         spec = torch.load(checkpoint_path)
-
-        # spec = torch.load(local_filename, map_location='cpu')
         assert 'pytorch-lightning_version' in spec, 'not a valid PyTorch Lightning checkpoint'
         state_dict = {k.replace('model.', ''): v
                       for k, v in spec['state_dict'].items()}
         self.load_state_dict(state_dict)
         return self
-        # # 加载模型状态
-        # self.load_state_dict(checkpoint['model_state_dict'])
-
-        # # 如果启用了 lr_scheduler，则加载优化器和调度器状态
-        # if self.lr_sch:
-        #     self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        #     self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-
-        # # 如果要加载 epoch 数和其他信息，可以像下面这样操作
-        # self.current_epoch = checkpoint['epoch']
-        # self.some_other_info = checkpoint['some_other_info']
-
-        # print("Checkpoint loaded successfully.")
-
-# # 创建训练数据
-# x1 = torch.randn(100, 4, 3)  # 随机生成两个输入数据，100 组数据
-# # x2 = torch.randn(100, 4)
-# # y = torch.randn(100, 4)   # 随机生成对应的输出数据
-
-# # 创建 Lightning Trainer 并训练模型
-# model = SimpleNN()
-# trainer = pl.Trainer(max_epochs=10)
-# trainer.fit(model, utils.data.DataLoader(x1))

@@ -12,11 +12,6 @@ from lightning.pytorch.callbacks import LearningRateMonitor
 import pandas as pd
 import torch
 
-# sr = 16000
-# audios = generate_audio(number=5, sr=sr)
-# for index, audio in enumerate(audios):
-#     sf.write(f'audio_{index}.wav', audio, sr)
-
 
 def data_train(x1, x2, y, is_test=False):
     # 定义要分割的比例
@@ -62,7 +57,6 @@ if __name__ == '__main__':
 
     df = pd.read_csv('data/nn_data_4000.csv')
 
-    # 将每列数据转换为张量
     tensor_dict = {}
 
     before_list = ['before_sig_MOS_DISC', 'before_sig_MOS_LOUD',
@@ -112,6 +106,6 @@ if __name__ == '__main__':
     #     x1, x2, y = batch
     #     y_pred = model.inference(x1, x2)
 
-    #     all_lose += nn.MSELoss()(y_pred, y)
+    #     all_lose += nn.L1()(y_pred, y)
 
     # print(f'test MSE loss: {all_lose/len(test_set)}')
