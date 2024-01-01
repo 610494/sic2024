@@ -55,7 +55,7 @@ if __name__ == '__main__':
     # x2 = torch.randn(number, 4)
     # y = torch.randn(number, 4)   # 随机生成对应的输出数据
 
-    df = pd.read_csv('data/nn_data_4000.csv')
+    df = pd.read_csv('data/nn_data_117800.csv')
 
     tensor_dict = {}
 
