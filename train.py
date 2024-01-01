@@ -8,14 +8,13 @@ from torch.utils.data import random_split, DataLoader, Dataset
 
 import lightning as pl
 from lightning.pytorch.callbacks import LearningRateMonitor
-
 import pandas as pd
-import torch
+from lightning.pytorch.loggers import WandbLogger
 
 
 def data_train(x1, x2, y, is_test=False):
     # 定义要分割的比例
-    train_ratio = 0.7
+    train_ratio = 1
     number = len(x1)
 
     # 计算要分割的数量
@@ -42,8 +41,8 @@ lr_monitor_callback = LearningRateMonitor(logging_interval='step')
 
 ckpt_callback = pl.pytorch.callbacks.ModelCheckpoint(
     dirpath=f'paraNN-cp',
-    filename="paraNN-{epoch}-{step}-{val_loss:.2f}",
-    monitor="val_loss",
+    filename="paraNN-{epoch}-{step}-{train_loss:.2f}",
+    monitor="train_loss",
     save_top_k=10,
     every_n_epochs=1,
 )
@@ -55,7 +54,7 @@ if __name__ == '__main__':
     # x2 = torch.randn(number, 4)
     # y = torch.randn(number, 4)   # 随机生成对应的输出数据
 
-    df = pd.read_csv('data/nn_data_117800.csv')
+    df = pd.read_csv('data/nn_data_300.csv')
 
     tensor_dict = {}
 
@@ -65,6 +64,8 @@ if __name__ == '__main__':
                   'after_sig_MOS_NOISE', 'after_sig_MOS_REVERB']
     para_list = ['para_sig_MOS_DISC', 'para_sig_MOS_LOUD',
                  'para_sig_MOS_NOISE', 'para_sig_MOS_REVERB']
+
+    wandb_logger = WandbLogger(project="nn")
 
     for column in before_list+after_list+para_list:
         tensor_dict[column] = torch.tensor(df[column].values).float()
@@ -98,8 +99,9 @@ if __name__ == '__main__':
                          strategy="ddp",
                          enable_checkpointing=True,
                          check_val_every_n_epoch=1,
+                         logger=wandb_logger,
                          callbacks=[ckpt_callback, lr_monitor_callback])
-    trainer.fit(model, training_loader, vaild_loader)
+    trainer.fit(model, training_loader)  # , vaild_loader
 
     # all_lose = 0
     # for batch in test_set:
